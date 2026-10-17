@@ -66,7 +66,7 @@ NSString *SLConnectCisco(NSDictionary *settings,NSString *(^passwordProvider)(vo
     // SSO uses Cisco's own browser handoff. For sites with a tested CLI flow,
     // select CLI explicitly; never fall back and issue a second auth attempt.
     BOOL cli=[settings[@"method"] isEqualToString:@"cli"];
-    if (!cli && !AXIsProcessTrusted()) return @"Enable SSH Launch in Privacy & Security > Accessibility for Cisco GUI automation.";
+    if (!cli && !AXIsProcessTrusted()) return @"Enable SSO Connect in Privacy & Security > Accessibility for Cisco GUI automation.";
     NSTask *cliTask=nil;
     if (cli) {
         cliTask=[NSTask new];cliTask.executableURL=[NSURL fileURLWithPath:SLCiscoCLI()];

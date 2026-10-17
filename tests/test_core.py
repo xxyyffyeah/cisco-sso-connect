@@ -1,6 +1,7 @@
 """Offline tests: synthetic identities only; never read a real Keychain or connect."""
 import json
 import os
+import plistlib
 from pathlib import Path
 import shlex
 import subprocess
@@ -9,7 +10,7 @@ import time
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-APP = ROOT / "build/SSH Launch.app/Contents/MacOS/SSHLaunch"
+APP = ROOT / "build/SSO Connect.app/Contents/MacOS/SSHLaunch"
 CORE = ROOT / "build/core-tests"
 
 
@@ -19,6 +20,15 @@ def core(*args):
 
 
 class CoreTests(unittest.TestCase):
+    def test_branding_keeps_persistent_identity(self):
+        with (APP.parents[1] / "Info.plist").open("rb") as handle:
+            info = plistlib.load(handle)
+        self.assertEqual(info["CFBundleDisplayName"], "SSO Connect")
+        self.assertEqual(info["CFBundleName"], "SSO Connect")
+        self.assertEqual(info["CFBundleIdentifier"], "org.sshlaunch.app")
+        self.assertEqual(info["CFBundleExecutable"], "SSHLaunch")
+        self.assertIn('Library/Application Support/SSH Launch', (ROOT / "src/Core.m").read_text())
+
     def test_all_optional_output_plans(self):
         for vpn in [0, 1]:
             for code in [0, 1]:

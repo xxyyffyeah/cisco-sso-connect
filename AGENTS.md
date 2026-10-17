@@ -1,6 +1,6 @@
 # Repository guidance
 
-SSH Launch primarily automates Cisco VPN/SSO on macOS. VS Code and local Terminal are independent optional outputs, off by default. Read docs/INSTALL.md and docs/CISCO_SSO.md before installing; use docs/AGENT_INSTALL_PROMPT.md for the workflow.
+SSO Connect primarily automates Cisco VPN/SSO on macOS. VS Code and local Terminal are independent optional outputs, off by default. Read docs/INSTALL.md and docs/CISCO_SSO.md before installing; use docs/AGENT_INSTALL_PROMPT.md for the workflow.
 
 - Never read or print private keys, passwords, tokens, Keychain values or full personal SSH configuration. Never ask users to paste secrets into agent chat.
 - Do not publish local hosts, account names, remote paths, screenshots, logs, application bundles or runtime state. Examples use reserved example.com names.

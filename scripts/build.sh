@@ -2,12 +2,12 @@
 set -euo pipefail
 repo_dir="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$repo_dir"
-if [[ "$(uname -s)" != Darwin ]]; then echo "SSH Launch requires macOS." >&2; exit 1; fi
+if [[ "$(uname -s)" != Darwin ]]; then echo "SSO Connect requires macOS." >&2; exit 1; fi
 if ! xcrun --find clang >/dev/null 2>&1; then
     echo "Install Apple's Command Line Tools with xcode-select --install, then rerun." >&2
     exit 1
 fi
-app_path="$repo_dir/build/SSH Launch.app"
+app_path="$repo_dir/build/SSO Connect.app"
 mkdir -p "$app_path/Contents/MacOS" "$app_path/Contents/Resources" "$repo_dir/build/AppIcon.iconset"
 xcrun clang -fobjc-arc -O2 -Wall -Wextra -Wno-unused-parameter \
     -mmacosx-version-min=13.0 -framework Cocoa -framework ApplicationServices -framework Security \

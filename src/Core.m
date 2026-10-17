@@ -66,7 +66,7 @@ NSString *SLTerminalScript(NSString *alias, NSString *folder) {
     if (!SLValidAlias(alias) || !SLValidFolder(folder)) return nil;
     NSString *remote = [SLRemoteCD(folder) stringByAppendingString:@" && exec \"${SHELL:-/bin/sh}\" -i"];
     return [NSString stringWithFormat:
-        @"#!/bin/sh\n# SSH Launch: no credentials in this file.\nexec /usr/bin/ssh -t -o ConnectTimeout=20 -- %@ %@\n",
+        @"#!/bin/sh\n# SSO Connect: no credentials in this file.\nexec /usr/bin/ssh -t -o ConnectTimeout=20 -- %@ %@\n",
         SLQuote(alias), SLQuote(remote)];
 }
 NSString *SLHash(NSString *value) {
@@ -233,7 +233,7 @@ BOOL SLConfigureHost(NSString *alias, NSString *sshDirectory, NSError **error) {
         if (lstat(path.fileSystemRepresentation,&st)==0 && (!S_ISREG(st.st_mode) || st.st_uid!=getuid())) return NO;
     }
     NSString *old = [fm fileExistsAtPath:config] ? [NSString stringWithContentsOfFile:config encoding:NSUTF8StringEncoding error:error] : @"";
-    NSString *current = [fm fileExistsAtPath:managed] ? [NSString stringWithContentsOfFile:managed encoding:NSUTF8StringEncoding error:error] : @"# Managed by SSH Launch. Only explicitly selected aliases.\n";
+    NSString *current = [fm fileExistsAtPath:managed] ? [NSString stringWithContentsOfFile:managed encoding:NSUTF8StringEncoding error:error] : @"# Managed by SSO Connect. Only explicitly selected aliases.\n";
     if (!old || !current) return NO;
     NSString *include = @"Include ~/.ssh/ssh-launch.conf\nHost *\n";
     if ([old containsString:@"ssh-launch.conf"] && ![old hasPrefix:include]) return NO;

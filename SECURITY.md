@@ -2,7 +2,7 @@
 
 ## Credential handling
 
-SSH Launch does not ship a password, token, private key, personal server address or account. It never exports an existing credential from another app. Optional target passwords are stored through the macOS Security framework under an endpoint-scoped Keychain service; secrets are not stored in files, command-line arguments, environment variables, clipboard or logs.
+SSO Connect does not ship a password, token, private key, personal server address or account. It never exports an existing credential from another app. Optional target passwords are stored through the macOS Security framework under an endpoint-scoped Keychain service; secrets are not stored in files, command-line arguments, environment variables, clipboard or logs.
 
 Plaintext credentials necessarily exist briefly in app memory, SSH's askpass response pipe, and (for opted-in Cisco autofill) the identity provider's password field via Accessibility. This is not a secure-memory/zeroization implementation. Do not run the internal helper under a tracing wrapper or capture its output. A compromised local account or trusted local executable is outside this application's protection boundary.
 

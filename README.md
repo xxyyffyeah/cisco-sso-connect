@@ -1,4 +1,6 @@
-# SSH Launch
+# SSO Connect
+
+Previously SSH Launch. [Upgrade notes](docs/INSTALL.md#upgrading-from-ssh-launch): existing settings and Keychain items keep their stable identifiers.
 
 **One-click Cisco VPN / SSO automation for macOS — with optional VS Code and Terminal launch.**
 
@@ -26,7 +28,7 @@ See [Cisco / SSO setup](docs/CISCO_SSO.md) for supported behavior and limitation
 
 Paste this into either agent on your Mac:
 
-> Install https://github.com/xxyyffyeah/ssh-launch. Read AGENTS.md, docs/INSTALL.md and docs/AGENT_INSTALL_PROMPT.md, inspect the scripts, then build, run the offline tests and install to ~/Applications. This is primarily a Cisco VPN/SSO automation tool. Discover the installed Cisco client and configured VPN endpoint locally; ask me when ambiguous. Leave Open VS Code and Open local Terminal off unless I choose them. Only inspect SSH aliases/folder history if I enable a remote app. Do not read private keys, export Keychain secrets, upload local configuration, or ask me to paste passwords into chat. Let me enter credentials in the native secure SSO Settings dialog and approve system permissions, fingerprints and MFA myself. Preserve existing VPN/SSH sessions. Verify what is safe, and clearly report anything not tested.
+> Install https://github.com/xxyyffyeah/cisco-sso-connect. Read AGENTS.md, docs/INSTALL.md and docs/AGENT_INSTALL_PROMPT.md, inspect the scripts, then build, run the offline tests and install to ~/Applications. This is primarily a Cisco VPN/SSO automation tool. Discover the installed Cisco client and configured VPN endpoint locally; ask me when ambiguous. Leave Open VS Code and Open local Terminal off unless I choose them. Only inspect SSH aliases/folder history if I enable a remote app. Do not read private keys, export Keychain secrets, upload local configuration, or ask me to paste passwords into chat. Let me enter credentials in the native secure SSO Settings dialog and approve system permissions, fingerprints and MFA myself. Preserve existing VPN/SSH sessions. Verify what is safe, and clearly report anything not tested.
 
 [Full installation prompt](docs/AGENT_INSTALL_PROMPT.md) · [中文说明](README.zh-CN.md)
 
@@ -35,18 +37,18 @@ Paste this into either agent on your Mac:
 Requires macOS 13+, Apple Command Line Tools, and Python 3 for tests. Install your organization's Cisco Secure Client VPN module for VPN mode. VS Code + Microsoft's Remote - SSH extension are needed **only if Open VS Code is selected**.
 
 ```sh
-git clone https://github.com/xxyyffyeah/ssh-launch.git
-cd ssh-launch
+git clone https://github.com/xxyyffyeah/cisco-sso-connect.git
+cd cisco-sso-connect
 bash scripts/test.sh
 bash scripts/install.sh
-open "$HOME/Applications/SSH Launch.app"
+open "$HOME/Applications/SSO Connect.app"
 ```
 
-Installation is user-local, requires no sudo, and does not edit SSH/VS Code settings or collect credentials. A previous SSH Launch app is backed up before updating.
+Installation is user-local, requires no sudo, and does not edit SSH/VS Code settings or collect credentials. A previous SSO Connect app is backed up before updating.
 
 ## First connection
 
-1. Enable SSH Launch in **System Settings → Privacy & Security → Accessibility** for Cisco GUI automation.
+1. Enable SSO Connect in **System Settings → Privacy & Security → Accessibility** for Cisco GUI automation.
 2. Enter your organization's VPN endpoint. Optional **SSO Settings** configure a trusted login origin, username, Keychain-only password, approved banner and connection method.
 3. Leave the optional apps unchecked for VPN-only use, or select VS Code and/or Terminal and choose an SSH host/folder.
 4. Click **Start Connection**. Approve MFA and unfamiliar prompts yourself.
@@ -56,7 +58,7 @@ For optional remote workspaces, the app discovers SSH aliases and VS Code histor
 
 ## Scope and security
 
-This is **0.2.0**, a locally built, ad-hoc-signed source release—not a notarized universal installer. It is not affiliated with Cisco. Embedded SSO accessibility varies by deployment; unknown layouts require manual completion. GUI mode is the default for SSO; CLI mode is available for deployments where you have verified it works. Neither mode retries authentication automatically.
+This is **0.2.1**, a locally built, ad-hoc-signed source release—not a notarized universal installer. It is not affiliated with Cisco. Embedded SSO accessibility varies by deployment; unknown layouts require manual completion. GUI mode is the default for SSO; CLI mode is available for deployments where you have verified it works. Neither mode retries authentication automatically.
 
 Remote features require OpenSSH-compatible hosts and a POSIX shell. Window reuse is best-effort and depends on VS Code's accessibility UI. [Setup](docs/INSTALL.md) · [Security](SECURITY.md) · [Architecture](docs/ARCHITECTURE.md)
 

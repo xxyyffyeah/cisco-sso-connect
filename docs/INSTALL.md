@@ -13,7 +13,7 @@ No Homebrew, npm, API token, paid agent subscription or GitHub credential is req
 
 ## Build and install
 
-Run `bash scripts/test.sh`, then `bash scripts/install.sh`. The app goes to ~/Applications/SSH Launch.app. An optional absolute destination directory can be passed to install.sh.
+Run `bash scripts/test.sh`, then `bash scripts/install.sh`. The app goes to ~/Applications/SSO Connect.app. An optional absolute destination directory can be passed to install.sh.
 
 The source build is locally ad-hoc signed, not Developer ID signed/notarized. The scripts clean metadata only on their own generated app bundle; they do not change macOS security policy or remove quarantine from downloaded third-party applications.
 
@@ -22,11 +22,17 @@ The installer does not open a network connection, install dependencies, modify y
 Verify:
 
 ```sh
-codesign --verify --deep --strict "$HOME/Applications/SSH Launch.app"
-"$HOME/Applications/SSH Launch.app/Contents/MacOS/SSHLaunch" --doctor
+codesign --verify --deep --strict "$HOME/Applications/SSO Connect.app"
+"$HOME/Applications/SSO Connect.app/Contents/MacOS/SSHLaunch" --doctor
 ```
 
 Doctor reports installed components and a host count, not account names, passwords, or config contents. Missing optional VS Code/SSH configuration does not fail VPN-only setup. It does not verify remote connectivity. The read-only `--cisco-status` command reports whether Cisco currently confirms Connected; it does not trigger login.
+
+## Upgrading from SSH Launch
+
+SSO Connect is the new name of SSH Launch. The bundle ID, signing requirement, internal `SSHLaunch` executable, preferences, Keychain service IDs, Application Support directory and managed SSH paths intentionally keep their original identifiers. Existing settings and saved credentials remain usable; older Keychain items may still be labeled "SSH Launch".
+
+The installer creates `SSO Connect.app` and does not delete the old app. Keep `SSH Launch.app` while any session helper still references it. Once those sessions have ended and the old app is quit, the old bundle can be moved to Trash. Do not remove its preferences, support directory or Keychain items. If macOS requests Accessibility permission again, enable the newly named installed app yourself.
 
 ## Cisco VPN / SSO first
 
@@ -36,7 +42,7 @@ VS Code and Terminal are independent follow-up choices. Enabling neither complet
 
 ## Permissions
 
-Open **System Settings → Privacy & Security → Accessibility**, add SSH Launch if needed, and enable it. This permits Cisco GUI connection/supported embedded SSO steps and, when selected, VS Code window restoration/status checking. If an OS update invalidates permission, re-enable the installed app. CLI-only VPN and Terminal-only SSH do not themselves require Accessibility.
+Open **System Settings → Privacy & Security → Accessibility**, add SSO Connect if needed, and enable it. This permits Cisco GUI connection/supported embedded SSO steps and, when selected, VS Code window restoration/status checking. If an OS update invalidates permission, re-enable the installed app. CLI-only VPN and Terminal-only SSH do not themselves require Accessibility.
 
 You must grant this yourself. Do not reset the entire permission database. No Screen Recording permission is required.
 
@@ -44,7 +50,7 @@ You must grant this yourself. Do not reset the entire permission database. No Sc
 
 Named aliases are read from ~/.ssh/config and nested Include files. Wildcards, negated patterns and non-simple aliases are omitted; supported alias characters are ASCII letters, digits, underscore, dot and hyphen, without a leading hyphen. Include discovery is bounded and does not evaluate Match conditions. OpenSSH resolves the actual selected alias, so discovery may show aliases unavailable under the current Match condition.
 
-Use the same SSH config and system OpenSSH in VS Code. A custom remote.SSH.configFile or remote.SSH.path may prevent session sharing; SSH Launch does not overwrite those settings.
+Use the same SSH config and system OpenSSH in VS Code. A custom remote.SSH.configFile or remote.SSH.path may prevent session sharing; SSO Connect does not overwrite those settings.
 
 On first use, if connection sharing is absent, the app asks permission to:
 
@@ -58,7 +64,7 @@ This lets VS Code and Terminal reuse the authenticated session without copying p
 For an explicitly approved agent setup:
 
 ```sh
-"$HOME/Applications/SSH Launch.app/Contents/MacOS/SSHLaunch" --configure-host demo
+"$HOME/Applications/SSO Connect.app/Contents/MacOS/SSHLaunch" --configure-host demo
 ```
 
 Only use a real alias selected by the user. Symlinked configs or an existing non-top-level managed Include are refused for manual review. Backups are private; do not commit them.
@@ -72,10 +78,10 @@ Recognized target-password prompts offer an unchecked **Save ... in macOS Keycha
 If a saved password is stale, stop and remove that one item before retrying:
 
 ```sh
-"$HOME/Applications/SSH Launch.app/Contents/MacOS/SSHLaunch" --forget-password demo
+"$HOME/Applications/SSO Connect.app/Contents/MacOS/SSHLaunch" --forget-password demo
 ```
 
-This removes only the current resolved alias's SSH Launch item, never other apps' credentials. Host/user/port/route changes create a different item; obsolete items can be removed manually in Keychain Access. No cross-host fallback is used. Keychain access can prompt again after a system or signing change.
+This removes only the current resolved alias's SSO Connect item, never other apps' credentials. Host/user/port/route changes create a different item; obsolete items can be removed manually in Keychain Access. No cross-host fallback is used. Keychain access can prompt again after a system or signing change.
 
 Never run the internal askpass helper to inspect its output. SSH consumes its response through a private pipe.
 
@@ -99,8 +105,8 @@ The app does not install VPN clients, guess endpoints, accept unknown organizati
 
 ## Uninstall / rollback
 
-Quit SSH Launch. Move only SSH Launch.app to Trash. Do not terminate shared SSH sessions while other clients need them.
+Quit SSO Connect. Move only SSO Connect.app to Trash. Do not terminate shared SSH sessions while other clients need them.
 
 If you enabled the managed Include, remove that exact Include and its immediately following Host * reset from ~/.ssh/config, then remove the selected block from ~/.ssh/ssh-launch.conf (or trash that file only if no aliases remain). Preserve later SSH edits; do not blindly restore an old backup. Keep ~/.ssh/ssh-launch sockets until associated sessions finish.
 
-Application state lives in ~/Library/Application Support/SSH Launch and preferences use org.sshlaunch.app. Keychain items use org.sshlaunch.password. for SSH or org.sshlaunch.sso. for Cisco SSO; uninstalling the app does not delete them automatically. Remove only the desired SSH Launch entries through Keychain Access.
+Application state lives in ~/Library/Application Support/SSH Launch and preferences use org.sshlaunch.app. Keychain items use org.sshlaunch.password. for SSH or org.sshlaunch.sso. for Cisco SSO; uninstalling the app does not delete them automatically. Remove only the desired SSO Connect entries through Keychain Access.

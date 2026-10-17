@@ -3,7 +3,7 @@
 Copy the following into your local coding agent. No MCP server, API key or special agent plugin is required.
 
 ```text
-Install SSH Launch from https://github.com/xxyyffyeah/ssh-launch on this Mac. Its primary purpose is Cisco VPN/SSO automation; VS Code and local Terminal are optional.
+Install SSO Connect from https://github.com/xxyyffyeah/cisco-sso-connect on this Mac. Its primary purpose is Cisco VPN/SSO automation; VS Code and local Terminal are optional.
 
 1. Confirm macOS 13+. Use a fresh checkout, read AGENTS.md, SECURITY.md, docs/INSTALL.md and docs/CISCO_SSO.md, and inspect the build/install scripts.
 2. Check Apple Command Line Tools and Python 3 for tests. Discover the installed Cisco Secure Client VPN module and configured endpoint locally without printing/exporting secrets. If several profiles exist, ask me which one to use. Do not guess an endpoint or install/modify organization-managed Cisco software.

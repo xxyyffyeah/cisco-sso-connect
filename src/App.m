@@ -32,7 +32,7 @@ static BOOL SLSavePassword(NSString *service, NSString *value) {
     if (status!=errSecItemNotFound) return NO;
     NSMutableDictionary *item=[SLKeyQuery(service) mutableCopy];
     item[(__bridge id)kSecValueData]=data;
-    item[(__bridge id)kSecAttrLabel]=[service hasPrefix:@"org.sshlaunch.sso."] ? @"SSH Launch — Cisco SSO password" : @"SSH Launch — SSH password";
+    item[(__bridge id)kSecAttrLabel]=[service hasPrefix:@"org.sshlaunch.sso."] ? @"SSO Connect — Cisco SSO password" : @"SSO Connect — SSH password";
     item[(__bridge id)kSecAttrAccessible]=(__bridge id)kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly;
     return SecItemAdd((__bridge CFDictionaryRef)item,NULL)==errSecSuccess;
 }
@@ -199,11 +199,11 @@ static BOOL SLOpenTerminal(NSString *alias,NSString *folder) {
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)app {return YES;}
 - (void)applicationDidFinishLaunching:(NSNotification *)note {
     NSMenu *menu=[NSMenu new]; NSMenuItem *appItem=[NSMenuItem new]; [menu addItem:appItem];
-    NSMenu *submenu=[NSMenu new]; [submenu addItemWithTitle:@"Quit SSH Launch" action:@selector(terminate:) keyEquivalent:@"q"];
+    NSMenu *submenu=[NSMenu new]; [submenu addItemWithTitle:@"Quit SSO Connect" action:@selector(terminate:) keyEquivalent:@"q"];
     appItem.submenu=submenu; NSApp.mainMenu=menu;
     self.window=[[NSWindow alloc] initWithContentRect:NSMakeRect(0,0,560,520)
         styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskClosable backing:NSBackingStoreBuffered defer:NO];
-    self.window.title=@"SSH Launch"; self.window.releasedWhenClosed=NO; [self.window center];
+    self.window.title=@"SSO Connect"; self.window.releasedWhenClosed=NO; [self.window center];
     NSView *view=self.window.contentView;
     NSTextField *title=[NSTextField labelWithString:@"Cisco SSO. One launch."];
     title.font=[NSFont systemFontOfSize:26 weight:NSFontWeightSemibold]; title.frame=NSMakeRect(32,458,500,36);[view addSubview:title];
@@ -357,7 +357,7 @@ static BOOL SLOpenTerminal(NSString *alias,NSString *folder) {
     if (code && !SLCodeCLI()) {self.status.stringValue=@"Install VS Code or turn off Open VS Code.";return;}
     BOOL guiVPN=vpn && ![[NSUserDefaults.standardUserDefaults stringForKey:@"ciscoMethod"] isEqualToString:@"cli"];
     if ((code || guiVPN) && !AXIsProcessTrustedWithOptions((__bridge CFDictionaryRef)@{(__bridge id)kAXTrustedCheckOptionPrompt:@YES})) {
-        self.status.stringValue=@"Enable SSH Launch in System Settings > Privacy & Security > Accessibility, then retry.";return;
+        self.status.stringValue=@"Enable SSO Connect in System Settings > Privacy & Security > Accessibility, then retry.";return;
     }
     NSDictionary *settings=[self ciscoSettings];
     self.busy=YES;[self optionsChanged:nil];[self.spinner startAnimation:nil];
@@ -386,7 +386,7 @@ static BOOL SLOpenTerminal(NSString *alias,NSString *folder) {
         __block BOOL approved=NO;
         dispatch_sync(dispatch_get_main_queue(),^{
             NSAlert *alert=[NSAlert new];alert.messageText=@"Share one authenticated SSH connection?";
-            alert.informativeText=@"SSH Launch can add a managed Include to ~/.ssh/config for this alias only. The original file is backed up. Other host settings and authentication methods are preserved.";
+            alert.informativeText=@"SSO Connect can add a managed Include to ~/.ssh/config for this alias only. The original file is backed up. Other host settings and authentication methods are preserved.";
             [alert addButtonWithTitle:@"Enable for This Server"];[alert addButtonWithTitle:@"Cancel"];
             approved=[alert runModal]==NSAlertFirstButtonReturn;
         });
