@@ -1,22 +1,38 @@
 # SSH Launch
 
-A small native macOS launcher for opening the same remote folder in **VS Code Remote SSH and Apple Terminal**.
+**One-click Cisco VPN / SSO automation for macOS — with optional VS Code and Terminal launch.**
 
-Bring your own SSH configuration. No university-specific account, VPN endpoint, password, or remote path is built in.
+The main job is to open Cisco Secure Client, connect to your configured VPN endpoint, advance supported SSO steps, and wait for Cisco to confirm the tunnel is connected. Opening a remote workspace is an optional follow-up, not a requirement.
+
+No university-specific VPN address, account, password or project path is built in.
+
+## Connect VPN first; choose what happens next
+
+- **Cisco VPN / SSO:** enabled by default. Select the endpoint, click Connect once, handle supported embedded SSO steps, optionally accept an explicitly approved banner, and wait for connected status.
+- **Open VS Code:** optional, off by default. Restore/open a selected Remote SSH workspace.
+- **Open local Terminal:** optional, off by default. Connect to the same SSH host and directory, independently of whether VS Code is enabled.
+
+You can use **VPN only**, VPN + either app, or VPN + both apps. Turn Cisco off for SSH-only use. Selections are remembered. VPN-only mode needs neither VS Code nor an SSH configuration.
+
+## What “SSO automation” means
+
+Cisco launches the authentication flow. For supported embedded pages, optional autofill is restricted to an exact trusted HTTPS login origin and explicitly labeled username/password fields. A separately configured SSO password is read from macOS Keychain, never from a script.
+
+Connect, username Next, password submit and approved-banner Accept are each attempted at most once per run. **MFA, unknown banners, external-browser authentication and unrecognized pages remain under your control.** Browser/password-manager autofill can handle external-browser login. This is not a universal unattended SSO or MFA-bypass tool.
+
+See [Cisco / SSO setup](docs/CISCO_SSO.md) for supported behavior and limitations.
 
 ## Install with Claude Code or Codex
 
-Paste this prompt into either coding agent on your Mac:
+Paste this into either agent on your Mac:
 
-> Install SSH Launch from https://github.com/xxyyffyeah/ssh-launch. Clone it into a new local folder, read AGENTS.md and docs/INSTALL.md, inspect the build/install scripts, then build, run the offline tests, and install to ~/Applications. Follow docs/AGENT_INSTALL_PROMPT.md. Discover existing SSH aliases and VS Code remote-folder history locally, but do not upload those files or read any private keys or Keychain secrets. Ask me which server/folder to use if ambiguous. Preserve existing SSH configuration, running connections and VS Code settings. Explain any missing dependencies or system permissions; do not bypass them. Let me enter credentials in secure system/app prompts and approve host fingerprints and MFA myself. Verify what you can and clearly report anything requiring my action.
+> Install https://github.com/xxyyffyeah/ssh-launch. Read AGENTS.md, docs/INSTALL.md and docs/AGENT_INSTALL_PROMPT.md, inspect the scripts, then build, run the offline tests and install to ~/Applications. This is primarily a Cisco VPN/SSO automation tool. Discover the installed Cisco client and configured VPN endpoint locally; ask me when ambiguous. Leave Open VS Code and Open local Terminal off unless I choose them. Only inspect SSH aliases/folder history if I enable a remote app. Do not read private keys, export Keychain secrets, upload local configuration, or ask me to paste passwords into chat. Let me enter credentials in the native secure SSO Settings dialog and approve system permissions, fingerprints and MFA myself. Preserve existing VPN/SSH sessions. Verify what is safe, and clearly report anything not tested.
 
-[Full agent installation prompt](docs/AGENT_INSTALL_PROMPT.md) · [中文说明](README.zh-CN.md)
-
-Agents can build and install the app. They **cannot silently grant macOS Accessibility access, approve MFA, or authenticate unknown hosts**.
+[Full installation prompt](docs/AGENT_INSTALL_PROMPT.md) · [中文说明](README.zh-CN.md)
 
 ## Manual install
 
-Requires macOS 13+, Apple Command Line Tools, Visual Studio Code, and Microsoft's Remote - SSH extension. Python 3 is needed for tests, not to run the app.
+Requires macOS 13+, Apple Command Line Tools, and Python 3 for tests. Install your organization's Cisco Secure Client VPN module for VPN mode. VS Code + Microsoft's Remote - SSH extension are needed **only if Open VS Code is selected**.
 
 ```sh
 git clone https://github.com/xxyyffyeah/ssh-launch.git
@@ -26,51 +42,31 @@ bash scripts/install.sh
 open "$HOME/Applications/SSH Launch.app"
 ```
 
-The default installation is user-local and needs no sudo. To use a writable system Applications directory: `bash scripts/install.sh /Applications`.
-
-The installer builds locally, signs ad hoc, and does **not** edit SSH/VS Code settings or access credentials. It backs up an existing SSH Launch app before an update.
-
-## What it does
-
-- Discovers named hosts from `~/.ssh/config` and Include files.
-- Uses OpenSSH's effective configuration for host, username, port, jump hosts and authentication.
-- Suggests folders from VS Code's local remote-workspace history and remembers your last selection per host.
-- Prefers your existing SSH key/agent policy; optionally saves a recognizable target-server password in macOS Keychain.
-- Reuses an authenticated SSH master for VS Code and Terminal. An on-demand helper keeps it independent of the launcher window.
-- Restores a uniquely matching VS Code window and clicks a visible English/Chinese Reload/Reconnect button when available.
-- Resolves and checks the remote folder before launching either client.
-- Supports an optional **local pre-connect executable** for your VPN or network preparation.
-
-See [setup and permissions](docs/INSTALL.md), [security model](SECURITY.md), and [architecture and limits](docs/ARCHITECTURE.md).
+Installation is user-local, requires no sudo, and does not edit SSH/VS Code settings or collect credentials. A previous SSH Launch app is backed up before updating.
 
 ## First connection
 
-1. Add a normal SSH Host entry if you do not already have one; see [examples](examples/ssh-config).
-2. Enable **SSH Launch** in **System Settings → Privacy & Security → Accessibility**.
-3. Choose the host and folder, then click **Start Connection**.
-4. If the host lacks SSH connection sharing, the app asks before adding a managed Include and backing up your config.
-5. Approve new host fingerprints after verifying them, and complete MFA yourself.
-6. VS Code opens or reconnects; local Terminal opens the same directory after VS Code's connected status is detected.
+1. Enable SSH Launch in **System Settings → Privacy & Security → Accessibility** for Cisco GUI automation.
+2. Enter your organization's VPN endpoint. Optional **SSO Settings** configure a trusted login origin, username, Keychain-only password, approved banner and connection method.
+3. Leave the optional apps unchecked for VPN-only use, or select VS Code and/or Terminal and choose an SSH host/folder.
+4. Click **Start Connection**. Approve MFA and unfamiliar prompts yourself.
+5. The optional apps run only after Cisco reports Connected. An existing connected tunnel is retained, not disconnected or switched automatically.
 
-SSH Launch does not send passwords through GUI keystrokes or the clipboard. Failed authentication stops without an automatic retry loop. A stale saved password can be removed with the documented `--forget-password ALIAS` command.
+For optional remote workspaces, the app discovers SSH aliases and VS Code history locally, prefers your SSH key/agent policy, scopes saved SSH passwords to the target identity, and reuses an authenticated master connection. Sharing configuration is changed only with consent and a backup.
 
-## Important scope
+## Scope and security
 
-This is an early **0.1.0** source release, not a notarized universal installer. "Any server" means a user-configured SSH host supported by OpenSSH and VS Code Remote SSH, with a POSIX-compatible remote shell—not every OS or proprietary VPN client.
+This is **0.2.0**, a locally built, ad-hoc-signed source release—not a notarized universal installer. It is not affiliated with Cisco. Embedded SSO accessibility varies by deployment; unknown layouts require manual completion. GUI mode is the default for SSO; CLI mode is available for deployments where you have verified it works. Neither mode retries authentication automatically.
 
-Window recovery depends on VS Code's accessibility UI and a unique alias/folder title; it is best-effort, not a guarantee across all editor versions and locales. Custom Remote SSH config files/executables must use the same connection-sharing settings. Terminal-only and Windows remote shells are not supported in this release.
+Remote features require OpenSSH-compatible hosts and a POSIX shell. Window reuse is best-effort and depends on VS Code's accessibility UI. [Setup](docs/INSTALL.md) · [Security](SECURITY.md) · [Architecture](docs/ARCHITECTURE.md)
 
-The former personal launcher and its school-specific assets/configuration are not included. This repository has fresh history containing only the public source distribution.
-
-## Development
+## Development and license
 
 ```sh
 bash scripts/test.sh
 python3 scripts/audit.py
 ```
 
-Tests use synthetic fixtures and never contact a server, read a real Keychain, or modify your real SSH config. GitHub Actions builds/tests on macOS and scans the published repository with Gitleaks.
+Offline tests use synthetic fixtures, not a real VPN, server or Keychain. GitHub Actions builds/tests on macOS and scans Git history with Gitleaks. Passing tests does not certify live SSO compatibility with your organization.
 
-## License
-
-[MIT](LICENSE). The original geometric app icon is included under the same license. No university branding is distributed.
+[MIT](LICENSE). Only original geometric icon artwork is distributed; no Cisco or university logos.

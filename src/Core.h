@@ -15,3 +15,7 @@ NSString *SLCredentialID(NSString *alias, NSDictionary *resolved);
 BOOL SLPasswordPromptMatches(NSString *prompt, NSDictionary *resolved);
 BOOL SLConfigureHost(NSString *alias, NSString *sshDirectory, NSError **error);
 BOOL SLPrivateDirectory(NSString *path);
+NSArray<NSString *> *SLConnectionPlan(BOOL vpn, BOOL code, BOOL terminal);
+NSString *SLVPNEndpoint(NSString *value);
+NSString *SLHTTPSOrigin(NSString *url);
+BOOL SLCiscoConnectedOutput(NSString *output);

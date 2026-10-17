@@ -5,9 +5,9 @@
 - macOS 13 or later; build on the target Mac (Apple Silicon or Intel).
 - Apple Command Line Tools: if missing, run `xcode-select --install` and complete Apple's installer.
 - Python 3 to run the offline tests. The application has no Python runtime dependency.
-- Visual Studio Code in /Applications or ~/Applications.
-- Microsoft's Remote - SSH extension: `ms-vscode-remote.remote-ssh`.
-- A configured SSH host and a POSIX-compatible remote shell. The remote OS must also meet [VS Code Remote SSH requirements](https://code.visualstudio.com/docs/remote/ssh).
+- Your organization's Cisco Secure Client VPN module for the primary VPN/SSO workflow.
+- Only for **Open VS Code**: Visual Studio Code in /Applications or ~/Applications and Microsoft's Remote - SSH extension (`ms-vscode-remote.remote-ssh`).
+- Only for either optional remote app: a configured SSH host and a POSIX-compatible remote shell. For VS Code, the remote OS must also meet [Remote SSH requirements](https://code.visualstudio.com/docs/remote/ssh).
 
 No Homebrew, npm, API token, paid agent subscription or GitHub credential is required by the application.
 
@@ -26,11 +26,17 @@ codesign --verify --deep --strict "$HOME/Applications/SSH Launch.app"
 "$HOME/Applications/SSH Launch.app/Contents/MacOS/SSHLaunch" --doctor
 ```
 
-Doctor reports prerequisite status and a host count, not account names, passwords, or config contents. It does not verify remote connectivity.
+Doctor reports installed components and a host count, not account names, passwords, or config contents. Missing optional VS Code/SSH configuration does not fail VPN-only setup. It does not verify remote connectivity. The read-only `--cisco-status` command reports whether Cisco currently confirms Connected; it does not trigger login.
+
+## Cisco VPN / SSO first
+
+The default selection is **Connect Cisco VPN / SSO on**, **Open VS Code off**, **Open local Terminal off**. Enter the organization's endpoint and use **SSO Settings** for optional trusted-origin autofill. See [Cisco / SSO setup](CISCO_SSO.md).
+
+VS Code and Terminal are independent follow-up choices. Enabling neither completes after VPN verification without resolving SSH config or opening an app. Enabling only Terminal does not require VS Code or its Accessibility integration. Turning Cisco off permits SSH-only use.
 
 ## Permissions
 
-Open **System Settings → Privacy & Security → Accessibility**, add SSH Launch if needed, and enable it. This permits narrowly scoped VS Code window restoration/status checking. If an OS update invalidates permission, re-enable the installed app.
+Open **System Settings → Privacy & Security → Accessibility**, add SSH Launch if needed, and enable it. This permits Cisco GUI connection/supported embedded SSO steps and, when selected, VS Code window restoration/status checking. If an OS update invalidates permission, re-enable the installed app. CLI-only VPN and Terminal-only SSH do not themselves require Accessibility.
 
 You must grant this yourself. Do not reset the entire permission database. No Screen Recording permission is required.
 
@@ -73,15 +79,15 @@ This removes only the current resolved alias's SSH Launch item, never other apps
 
 Never run the internal askpass helper to inspect its output. SSH consumes its response through a private pipe.
 
-## Optional VPN / pre-connect hook
+## Advanced pre-SSH hook
 
-The default is **no VPN integration**. For a trusted local executable that connects a VPN and waits for readiness:
+The built-in Cisco flow does not require a script. For advanced, additional network preparation before optional SSH clients, configure a trusted local executable:
 
 ```sh
 defaults write org.sshlaunch.app beforeConnectExecutable -string "$HOME/.config/ssh-launch/connect-vpn"
 ```
 
-The executable receives the selected SSH alias as its only argument. It must be a regular executable owned by you and not group/world writable. It runs once before SSH, has a 180-second deadline, and must return zero only after network access is ready. Output is not shown in the UI or persisted. Do not put secrets in it; use the vendor's credential store and leave MFA interactive.
+The executable receives the selected SSH alias as its only argument. It must be a regular executable owned by you and not group/world writable. It runs once before SSH (after the built-in Cisco stage if enabled), has a 180-second deadline, and must return zero only after network access is ready. It is not run in VPN-only mode. Output is not shown in the UI or persisted. Do not put secrets in it; use the vendor's credential store and leave MFA interactive.
 
 Remove this setting to disable it:
 
@@ -89,7 +95,7 @@ Remove this setting to disable it:
 defaults delete org.sshlaunch.app beforeConnectExecutable
 ```
 
-The app does not install VPN clients, guess endpoints, accept organization banners, or replay a school credential. Configure and review vendor-specific automation separately.
+The app does not install VPN clients, guess endpoints, accept unknown organization banners, or replay another app's credential.
 
 ## Uninstall / rollback
 
@@ -97,4 +103,4 @@ Quit SSH Launch. Move only SSH Launch.app to Trash. Do not terminate shared SSH 
 
 If you enabled the managed Include, remove that exact Include and its immediately following Host * reset from ~/.ssh/config, then remove the selected block from ~/.ssh/ssh-launch.conf (or trash that file only if no aliases remain). Preserve later SSH edits; do not blindly restore an old backup. Keep ~/.ssh/ssh-launch sockets until associated sessions finish.
 
-Application state lives in ~/Library/Application Support/SSH Launch and preferences use org.sshlaunch.app. Keychain items have the org.sshlaunch.password. prefix; uninstalling the app does not delete them automatically. Remove only the desired SSH Launch entries through Keychain Access.
+Application state lives in ~/Library/Application Support/SSH Launch and preferences use org.sshlaunch.app. Keychain items use org.sshlaunch.password. for SSH or org.sshlaunch.sso. for Cisco SSO; uninstalling the app does not delete them automatically. Remove only the desired SSH Launch entries through Keychain Access.

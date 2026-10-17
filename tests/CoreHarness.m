@@ -3,6 +3,10 @@ int main(int argc,const char *argv[]) {
     @autoreleasepool {
         NSArray *args=NSProcessInfo.processInfo.arguments;
         id result=nil;
+        if (argc==5 && [args[1] isEqual:@"plan"]) result=SLConnectionPlan([args[2] boolValue],[args[3] boolValue],[args[4] boolValue]);
+        if (argc==3 && [args[1] isEqual:@"vpn-url"]) result=@[SLVPNEndpoint(args[2]) ?: [NSNull null]];
+        if (argc==3 && [args[1] isEqual:@"origin"]) result=@[SLHTTPSOrigin(args[2]) ?: [NSNull null]];
+        if (argc==3 && [args[1] isEqual:@"cisco-state"]) result=@[@(SLCiscoConnectedOutput(args[2]))];
         if (argc==3 && [args[1] isEqual:@"hosts"]) result=SLHosts(args[2]);
         if (argc==4 && [args[1] isEqual:@"recent"]) result=SLRecentFolders(args[2],args[3]);
         if (argc==4 && [args[1] isEqual:@"configure"]) return SLConfigureHost(args[2],args[3],nil)?0:1;

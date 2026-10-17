@@ -6,6 +6,42 @@
 #import <signal.h>
 #import <fcntl.h>
 
+NSArray<NSString *> *SLConnectionPlan(BOOL vpn, BOOL code, BOOL terminal) {
+    NSMutableArray *plan=[NSMutableArray array];
+    if (vpn) [plan addObject:@"vpn"];
+    if (code || terminal) [plan addObjectsFromArray:@[@"ssh",@"folder"]];
+    if (code) [plan addObject:@"vscode"];
+    if (terminal) [plan addObject:@"terminal"];
+    return plan;
+}
+NSString *SLHTTPSOrigin(NSString *url) {
+    if (!url.length || [url rangeOfCharacterFromSet:NSCharacterSet.whitespaceAndNewlineCharacterSet].location!=NSNotFound ||
+        [url rangeOfCharacterFromSet:NSCharacterSet.controlCharacterSet].location!=NSNotFound || [url containsString:@"\\"]) return nil;
+    NSURLComponents *parts=[NSURLComponents componentsWithString:url];
+    if (![parts.scheme.lowercaseString isEqualToString:@"https"] || !parts.host.length || parts.user || parts.password) return nil;
+    if (parts.port && (parts.port.integerValue<1 || parts.port.integerValue>65535)) return nil;
+    NSURLComponents *origin=[NSURLComponents new];origin.scheme=@"https";origin.host=parts.host.lowercaseString;
+    if (parts.port.integerValue!=443) origin.port=parts.port;
+    return origin.string;
+}
+NSString *SLVPNEndpoint(NSString *value) {
+    if (!value.length || [value hasPrefix:@"-"]) return nil;
+    NSString *url=[value containsString:@"://"] ? value : [@"https://" stringByAppendingString:value];
+    if (!SLHTTPSOrigin(url)) return nil;
+    NSURLComponents *parts=[NSURLComponents componentsWithString:url];
+    if (parts.query || parts.fragment) return nil;
+    return url;
+}
+BOOL SLCiscoConnectedOutput(NSString *output) {
+    NSRegularExpression *pattern=[NSRegularExpression regularExpressionWithPattern:
+        @"(?im)^[ \\t]*(?:>>[ \\t]*)?state:[ \\t]*([^\\r\\n]*)" options:0 error:nil];
+    NSTextCheckingResult *last=[pattern matchesInString:output options:0 range:NSMakeRange(0,output.length)].lastObject;
+    if (!last) return NO;
+    NSString *state=[[output substringWithRange:[last rangeAtIndex:1]]
+        stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceCharacterSet];
+    return [state.lowercaseString isEqualToString:@"connected"];
+}
+
 BOOL SLValidAlias(NSString *alias) {
     if (!alias.length || alias.length > 128) return NO;
     NSRegularExpression *re = [NSRegularExpression regularExpressionWithPattern:

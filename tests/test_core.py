@@ -19,6 +19,39 @@ def core(*args):
 
 
 class CoreTests(unittest.TestCase):
+    def test_all_optional_output_plans(self):
+        for vpn in [0, 1]:
+            for code in [0, 1]:
+                for terminal in [0, 1]:
+                    expected = (["vpn"] if vpn else []) + (["ssh", "folder"] if code or terminal else [])
+                    expected += (["vscode"] if code else []) + (["terminal"] if terminal else [])
+                    self.assertEqual(core("plan", vpn, code, terminal), expected)
+        self.assertEqual(core("plan", 1, 0, 0), ["vpn"])  # no SSH config / clients needed
+        self.assertNotIn("vscode", core("plan", 0, 0, 1))
+
+    def test_vpn_endpoint_rejects_secrets_and_injection(self):
+        self.assertEqual(core("vpn-url", "vpn.example.com/group"), ["https://vpn.example.com/group"])
+        for value in ["", "-bad", "http://vpn.example.com", "https://user:secret@example.com",
+                      "vpn.example.com?token=example", "vpn.example.com#fragment", "vpn.example.com\nbad",
+                      "https://vpn.example.com\\evil", "https://vpn.example.com:99999"]:
+            self.assertEqual(core("vpn-url", value), [None])
+
+    def test_sso_origin_is_exact_https_not_suffix_matching(self):
+        self.assertEqual(core("origin", "https://LOGIN.example.com:443/signin?state=example"), ["https://login.example.com"])
+        self.assertEqual(core("origin", "https://login.example.com:8443/signin"), ["https://login.example.com:8443"])
+        for value in ["http://login.example.com", "file:///tmp/signin", "https://user@example.com", "javascript:example"]:
+            self.assertEqual(core("origin", value), [None])
+        self.assertNotEqual(core("origin", "https://login.example.com.attacker.example"), ["https://login.example.com"])
+
+    def test_cisco_state_requires_connected_not_disconnected(self):
+        for text in [">> state: Connected\n", "  >> State: Connected\r\nVPN> ", "state: connected"]:
+            self.assertEqual(core("cisco-state", text), [True])
+        for text in ["state: Disconnected", "state: Connecting", "notice: Connected",
+                     "state: Connected to something", "previous state: Connected",
+                     ">> state: Connected\n>> state: Disconnected\n", ""]:
+            self.assertEqual(core("cisco-state", text), [False])
+        self.assertEqual(core("cisco-state", ">> state: Disconnected\n>> state: Connected"), [True])
+
     def terminal(self, alias, folder):
         script = subprocess.check_output([str(APP), "--print-terminal-script", alias, folder], text=True)
         subprocess.run(["/bin/sh", "-n"], input=script, text=True, check=True)

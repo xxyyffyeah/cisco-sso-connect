@@ -11,7 +11,7 @@ app_path="$repo_dir/build/SSH Launch.app"
 mkdir -p "$app_path/Contents/MacOS" "$app_path/Contents/Resources" "$repo_dir/build/AppIcon.iconset"
 xcrun clang -fobjc-arc -O2 -Wall -Wextra -Wno-unused-parameter \
     -mmacosx-version-min=13.0 -framework Cocoa -framework ApplicationServices -framework Security \
-    src/Core.m src/App.m -o "$app_path/Contents/MacOS/SSHLaunch"
+    src/Core.m src/Cisco.m src/App.m -o "$app_path/Contents/MacOS/SSHLaunch"
 cp src/Info.plist "$app_path/Contents/Info.plist"
 xcrun clang -fobjc-arc -O2 -framework Cocoa src/Icon.m -o build/make-icon
 build/make-icon build/icon.png
