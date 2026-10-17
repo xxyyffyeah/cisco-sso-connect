@@ -1,0 +1,20 @@
+# Illustrative only. Copy/adapt only with the account owner's approval.
+Host demo
+    HostName server.example.com
+    User developer
+    Port 2222
+    IdentityFile ~/.ssh/id_ed25519
+    AddKeysToAgent yes
+
+Host bastion
+    HostName gateway.example.com
+    User developer
+
+Host private-demo
+    HostName internal.example.com
+    User developer
+    ProxyJump bastion
+    IdentityFile ~/.ssh/id_ed25519
+
+# Do not disable StrictHostKeyChecking or enable ForwardAgent globally.
+# Connection sharing is configured separately, with a backup, on first use.
